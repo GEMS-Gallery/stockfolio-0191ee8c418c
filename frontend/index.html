@@ -6,58 +6,111 @@
     <title>Stock Holdings App</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 40px;
+            background-color: #f7fafc;
+            color: #1a202c;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        .card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
         }
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
         }
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            padding: 16px;
             text-align: left;
+            border-bottom: 1px solid #e2e8f0;
         }
         th {
-            background-color: #f2f2f2;
+            font-weight: 600;
+            color: #4a5568;
+            background-color: #f8fafc;
         }
         form {
-            margin-bottom: 20px;
+            display: grid;
+            gap: 16px;
         }
         input, button {
-            margin: 5px 0;
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4299e1;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #3182ce;
+        }
+        .summary {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 24px;
+        }
+        .summary p {
+            font-size: 18px;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <h1>Stock Holdings App</h1>
-    
-    <form id="addHoldingForm">
-        <input type="text" id="name" placeholder="Stock Name" required>
-        <input type="number" id="quantity" placeholder="Quantity" required>
-        <input type="number" id="marketValue" placeholder="Market Value" step="0.01" required>
-        <input type="number" id="performance" placeholder="Performance (%)" step="0.01" required>
-        <button type="submit">Add Holding</button>
-    </form>
+    <div class="container">
+        <h1>Stock Holdings App</h1>
+        
+        <div class="card">
+            <form id="addHoldingForm">
+                <input type="text" id="name" placeholder="Stock Name" required>
+                <input type="number" id="quantity" placeholder="Quantity" required>
+                <input type="number" id="marketValue" placeholder="Market Value" step="0.01" required>
+                <input type="number" id="performance" placeholder="Performance (%)" step="0.01" required>
+                <button type="submit">Add Holding</button>
+            </form>
+        </div>
 
-    <table id="holdingsTable">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Quantity</th>
-                <th>Market Value</th>
-                <th>Performance</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+        <div class="card">
+            <table id="holdingsTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Quantity</th>
+                        <th>Market Value</th>
+                        <th>Performance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
 
-    <div id="summary">
-        <p>Total Portfolio Value: $<span id="totalValue">0.00</span></p>
-        <p>Average Performance: <span id="averagePerformance">0.00</span>%</p>
+        <div class="summary">
+            <p>Total Portfolio Value: $<span id="totalValue">0.00</span></p>
+            <p>Average Performance: <span id="averagePerformance">0.00</span>%</p>
+        </div>
     </div>
 
     <script src="index.js"></script>
