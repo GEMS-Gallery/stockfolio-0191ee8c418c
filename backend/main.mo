@@ -1,5 +1,4 @@
 import Bool "mo:base/Bool";
-import Func "mo:base/Func";
 import Nat "mo:base/Nat";
 
 import Array "mo:base/Array";
@@ -7,49 +6,65 @@ import Float "mo:base/Float";
 import Int "mo:base/Int";
 import Iter "mo:base/Iter";
 import Text "mo:base/Text";
+import Time "mo:base/Time";
+import Debug "mo:base/Debug";
+import Option "mo:base/Option";
 
 actor StockHoldings {
-  // Define the structure for a stock holding
-  public type Holding = {
+  type Holding = {
     id: Nat;
+    symbol: Text;
     name: Text;
     quantity: Nat;
-    marketValue: Float;
+    acquisitionPrice: Float;
+    acquisitionDate: Int;
+    currentPrice: Float;
     performance: Float;
   };
 
   stable var holdings: [Holding] = [];
   stable var nextId: Nat = 0;
 
-  // Function to add a new holding
-  public func addHolding(name: Text, quantity: Nat, marketValue: Float, performance: Float) : async Nat {
+  public func addHolding(symbol: Text, quantity: Nat, acquisitionPrice: Float) : async Nat {
+    let stockInfo = getStockInfo(symbol);
+    let currentPrice = stockInfo.0;
+    let name = stockInfo.1;
+    let performance = calculatePerformance(acquisitionPrice, currentPrice);
+    
     let id = nextId;
     nextId += 1;
     let newHolding: Holding = {
       id;
+      symbol;
       name;
       quantity;
-      marketValue;
+      acquisitionPrice;
+      acquisitionDate = Time.now();
+      currentPrice;
       performance;
     };
     holdings := Array.append(holdings, [newHolding]);
     id
   };
 
-  // Function to get all holdings
   public query func getAllHoldings() : async [Holding] {
     holdings
   };
 
-  // Function to update a holding
-  public func updateHolding(id: Nat, name: Text, quantity: Nat, marketValue: Float, performance: Float) : async Bool {
+  public func updateHolding(id: Nat, quantity: Nat) : async Bool {
     let updatedHoldings = Array.map<Holding, Holding>(holdings, func (h) {
       if (h.id == id) {
+        let stockInfo = getStockInfo(h.symbol);
+        let currentPrice = stockInfo.0;
+        let performance = calculatePerformance(h.acquisitionPrice, currentPrice);
         {
           id = h.id;
-          name = name;
+          symbol = h.symbol;
+          name = h.name;
           quantity = quantity;
-          marketValue = marketValue;
+          acquisitionPrice = h.acquisitionPrice;
+          acquisitionDate = h.acquisitionDate;
+          currentPrice = currentPrice;
           performance = performance;
         }
       } else {
@@ -65,26 +80,48 @@ actor StockHoldings {
     }
   };
 
-  // Function to delete a holding
   public func deleteHolding(id: Nat) : async Bool {
     let initialLength = holdings.size();
     holdings := Array.filter<Holding>(holdings, func(h) { h.id != id });
     holdings.size() != initialLength
   };
 
-  // Function to calculate total portfolio value
   public query func getTotalPortfolioValue() : async Float {
-    Array.foldLeft<Holding, Float>(holdings, 0, func(acc, h) { acc + h.marketValue * Float.fromInt(h.quantity) })
+    Array.foldLeft<Holding, Float>(holdings, 0, func(acc, h) { acc + h.currentPrice * Float.fromInt(h.quantity) })
   };
 
-  // Function to calculate average portfolio performance
   public query func getAveragePerformance() : async Float {
-    let totalValue = Array.foldLeft<Holding, Float>(holdings, 0, func(acc, h) { acc + h.marketValue * Float.fromInt(h.quantity) });
-    let weightedPerformance = Array.foldLeft<Holding, Float>(holdings, 0, func(acc, h) { acc + h.performance * h.marketValue * Float.fromInt(h.quantity) });
+    let totalValue = Array.foldLeft<Holding, Float>(holdings, 0, func(acc, h) { acc + h.currentPrice * Float.fromInt(h.quantity) });
+    let weightedPerformance = Array.foldLeft<Holding, Float>(holdings, 0, func(acc, h) { acc + h.performance * h.currentPrice * Float.fromInt(h.quantity) });
     if (totalValue == 0) {
       0
     } else {
       weightedPerformance / totalValue
     }
+  };
+
+  private func getStockInfo(symbol: Text) : (Float, Text) {
+    // Simulated stock data
+    let stockData = [
+      ("AAPL", ("Apple Inc.", 150.25)),
+      ("GOOGL", ("Alphabet Inc.", 2750.80)),
+      ("MSFT", ("Microsoft Corporation", 305.15)),
+      ("AMZN", ("Amazon.com Inc.", 3380.50)),
+      ("FB", ("Meta Platforms Inc.", 325.75))
+    ];
+
+    switch (Array.find<(Text, (Text, Float))>(stockData, func(item) { item.0 == symbol })) {
+      case (?found) {
+        (found.1.1, found.1.0)
+      };
+      case (null) {
+        Debug.print("Stock not found: " # symbol);
+        (0, "Unknown")
+      };
+    }
+  };
+
+  private func calculatePerformance(acquisitionPrice: Float, currentPrice: Float) : Float {
+    ((currentPrice - acquisitionPrice) / acquisitionPrice) * 100
   };
 }

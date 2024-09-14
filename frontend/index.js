@@ -19,12 +19,14 @@ function renderHoldings() {
     holdings.forEach(holding => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
+            <td>${holding.symbol}</td>
             <td>${holding.name}</td>
             <td>${holding.quantity}</td>
-            <td>$${holding.marketValue.toFixed(2)}</td>
+            <td>$${holding.acquisitionPrice.toFixed(2)}</td>
+            <td>$${holding.currentPrice.toFixed(2)}</td>
             <td>${holding.performance.toFixed(2)}%</td>
             <td>
-                <button onclick="editHolding(${holding.id})">Edit</button>
+                <button onclick="updateHolding(${holding.id})">Update</button>
                 <button onclick="deleteHolding(${holding.id})">Delete</button>
             </td>
         `;
@@ -46,35 +48,33 @@ async function updateSummary() {
 
 document.getElementById('addHoldingForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = document.getElementById('name').value;
+    const symbol = document.getElementById('symbol').value.toUpperCase();
     const quantity = parseInt(document.getElementById('quantity').value);
-    const marketValue = parseFloat(document.getElementById('marketValue').value);
-    const performance = parseFloat(document.getElementById('performance').value);
+    const acquisitionPrice = parseFloat(document.getElementById('acquisitionPrice').value);
 
     try {
-        await backend.addHolding(name, quantity, marketValue, performance);
+        await backend.addHolding(symbol, quantity, acquisitionPrice);
         e.target.reset();
         refreshHoldings();
     } catch (error) {
         console.error("Error adding holding:", error);
+        alert("Failed to add holding. Please check the stock symbol and try again.");
     }
 });
 
-window.editHolding = async (id) => {
+window.updateHolding = async (id) => {
     const holding = holdings.find(h => h.id === id);
     if (!holding) return;
 
-    const name = prompt('Enter new name', holding.name);
-    const quantity = parseInt(prompt('Enter new quantity', holding.quantity));
-    const marketValue = parseFloat(prompt('Enter new market value', holding.marketValue));
-    const performance = parseFloat(prompt('Enter new performance', holding.performance));
+    const newQuantity = parseInt(prompt('Enter new quantity', holding.quantity));
 
-    if (name && !isNaN(quantity) && !isNaN(marketValue) && !isNaN(performance)) {
+    if (!isNaN(newQuantity)) {
         try {
-            await backend.updateHolding(id, name, quantity, marketValue, performance);
+            await backend.updateHolding(id, newQuantity);
             refreshHoldings();
         } catch (error) {
             console.error("Error updating holding:", error);
+            alert("Failed to update holding. Please try again.");
         }
     }
 };
@@ -86,6 +86,7 @@ window.deleteHolding = async (id) => {
             refreshHoldings();
         } catch (error) {
             console.error("Error deleting holding:", error);
+            alert("Failed to delete holding. Please try again.");
         }
     }
 };

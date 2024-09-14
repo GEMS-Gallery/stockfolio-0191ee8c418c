@@ -84,10 +84,9 @@
         
         <div class="card">
             <form id="addHoldingForm">
-                <input type="text" id="name" placeholder="Stock Name" required>
+                <input type="text" id="symbol" placeholder="Stock Symbol" required>
                 <input type="number" id="quantity" placeholder="Quantity" required>
-                <input type="number" id="marketValue" placeholder="Market Value" step="0.01" required>
-                <input type="number" id="performance" placeholder="Performance (%)" step="0.01" required>
+                <input type="number" id="acquisitionPrice" placeholder="Acquisition Price" step="0.01" required>
                 <button type="submit">Add Holding</button>
             </form>
         </div>
@@ -96,9 +95,11 @@
             <table id="holdingsTable">
                 <thead>
                     <tr>
+                        <th>Symbol</th>
                         <th>Name</th>
                         <th>Quantity</th>
-                        <th>Market Value</th>
+                        <th>Acquisition Price</th>
+                        <th>Current Price</th>
                         <th>Performance</th>
                         <th>Actions</th>
                     </tr>
