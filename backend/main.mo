@@ -25,10 +25,7 @@ actor StockHoldings {
   stable var holdings: [Holding] = [];
   stable var nextId: Nat = 0;
 
-  public func addHolding(symbol: Text, quantity: Nat, acquisitionPrice: Float) : async Nat {
-    let stockInfo = getStockInfo(symbol);
-    let currentPrice = stockInfo.0;
-    let name = stockInfo.1;
+  public func addHolding(symbol: Text, name: Text, quantity: Nat, acquisitionPrice: Float, currentPrice: Float) : async Nat {
     let performance = calculatePerformance(acquisitionPrice, currentPrice);
     
     let id = nextId;
@@ -51,11 +48,9 @@ actor StockHoldings {
     holdings
   };
 
-  public func updateHolding(id: Nat, quantity: Nat) : async Bool {
+  public func updateHolding(id: Nat, quantity: Nat, currentPrice: Float) : async Bool {
     let updatedHoldings = Array.map<Holding, Holding>(holdings, func (h) {
       if (h.id == id) {
-        let stockInfo = getStockInfo(h.symbol);
-        let currentPrice = stockInfo.0;
         let performance = calculatePerformance(h.acquisitionPrice, currentPrice);
         {
           id = h.id;
@@ -97,27 +92,6 @@ actor StockHoldings {
       0
     } else {
       weightedPerformance / totalValue
-    }
-  };
-
-  private func getStockInfo(symbol: Text) : (Float, Text) {
-    // Simulated stock data
-    let stockData = [
-      ("AAPL", ("Apple Inc.", 150.25)),
-      ("GOOGL", ("Alphabet Inc.", 2750.80)),
-      ("MSFT", ("Microsoft Corporation", 305.15)),
-      ("AMZN", ("Amazon.com Inc.", 3380.50)),
-      ("FB", ("Meta Platforms Inc.", 325.75))
-    ];
-
-    switch (Array.find<(Text, (Text, Float))>(stockData, func(item) { item.0 == symbol })) {
-      case (?found) {
-        (found.1.1, found.1.0)
-      };
-      case (null) {
-        Debug.print("Stock not found: " # symbol);
-        (0, "Unknown")
-      };
     }
   };
 

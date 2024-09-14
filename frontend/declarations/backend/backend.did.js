@@ -10,12 +10,16 @@ export const idlFactory = ({ IDL }) => {
     'symbol' : IDL.Text,
   });
   return IDL.Service({
-    'addHolding' : IDL.Func([IDL.Text, IDL.Nat, IDL.Float64], [IDL.Nat], []),
+    'addHolding' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Nat, IDL.Float64, IDL.Float64],
+        [IDL.Nat],
+        [],
+      ),
     'deleteHolding' : IDL.Func([IDL.Nat], [IDL.Bool], []),
     'getAllHoldings' : IDL.Func([], [IDL.Vec(Holding)], ['query']),
     'getAveragePerformance' : IDL.Func([], [IDL.Float64], ['query']),
     'getTotalPortfolioValue' : IDL.Func([], [IDL.Float64], ['query']),
-    'updateHolding' : IDL.Func([IDL.Nat, IDL.Nat], [IDL.Bool], []),
+    'updateHolding' : IDL.Func([IDL.Nat, IDL.Nat, IDL.Float64], [IDL.Bool], []),
   });
 };
 export const init = ({ IDL }) => { return []; };

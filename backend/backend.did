@@ -10,10 +10,10 @@ type Holding =
    symbol: text;
  };
 service : {
-  addHolding: (text, nat, float64) -> (nat);
+  addHolding: (text, text, nat, float64, float64) -> (nat);
   deleteHolding: (nat) -> (bool);
   getAllHoldings: () -> (vec Holding) query;
   getAveragePerformance: () -> (float64) query;
   getTotalPortfolioValue: () -> (float64) query;
-  updateHolding: (nat, nat) -> (bool);
+  updateHolding: (nat, nat, float64) -> (bool);
 }

@@ -13,12 +13,12 @@ export interface Holding {
   'symbol' : string,
 }
 export interface _SERVICE {
-  'addHolding' : ActorMethod<[string, bigint, number], bigint>,
+  'addHolding' : ActorMethod<[string, string, bigint, number, number], bigint>,
   'deleteHolding' : ActorMethod<[bigint], boolean>,
   'getAllHoldings' : ActorMethod<[], Array<Holding>>,
   'getAveragePerformance' : ActorMethod<[], number>,
   'getTotalPortfolioValue' : ActorMethod<[], number>,
-  'updateHolding' : ActorMethod<[bigint, bigint], boolean>,
+  'updateHolding' : ActorMethod<[bigint, bigint, number], boolean>,
 }
 export declare const idlFactory: IDL.InterfaceFactory;
 export declare const init: (args: { IDL: typeof IDL }) => IDL.Type[];
