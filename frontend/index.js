@@ -2,27 +2,37 @@ import { backend } from './declarations/backend';
 
 let holdings = [];
 
+const API_KEY = 'YOUR_ALPHA_VANTAGE_API_KEY'; // Replace with your actual API key
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+const stockDataCache = new Map();
+
 async function fetchStockData(symbol) {
-    const apiKey = 'demo'; // Replace with your Alpha Vantage API key for production use
-    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
+    const cachedData = stockDataCache.get(symbol);
+    if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
+        return cachedData.data;
+    }
+
+    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${API_KEY}`;
 
     try {
         const response = await fetch(url);
         const data = await response.json();
 
-        if (data['Global Quote']) {
-            const quote = data['Global Quote'];
-            return {
-                symbol: quote['01. symbol'],
-                price: parseFloat(quote['05. price']),
-                name: symbol // Alpha Vantage doesn't provide company name in this API, so we're using the symbol as a placeholder
+        if (data['Global Quote'] && data['Global Quote']['05. price']) {
+            const stockData = {
+                symbol: data['Global Quote']['01. symbol'],
+                price: parseFloat(data['Global Quote']['05. price']),
+                name: symbol // Alpha Vantage doesn't provide company name in this API
             };
+            stockDataCache.set(symbol, { data: stockData, timestamp: Date.now() });
+            return stockData;
         } else {
-            throw new Error('Stock data not found');
+            throw new Error('Invalid API response');
         }
     } catch (error) {
         console.error('Error fetching stock data:', error);
-        throw error;
+        throw new Error(`Failed to fetch data for ${symbol}: ${error.message}`);
     }
 }
 
@@ -35,6 +45,7 @@ async function refreshHoldings() {
         updateSummary();
     } catch (error) {
         console.error("Error refreshing holdings:", error);
+        showError("Failed to refresh holdings. Please try again later.");
     } finally {
         showLoading(false);
     }
@@ -48,6 +59,7 @@ async function updateHoldingsWithLatestPrices() {
         } catch (error) {
             console.error(`Error updating holding ${holding.symbol}:`, error);
         }
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay between API calls
     }
 }
 
@@ -82,6 +94,7 @@ async function updateSummary() {
         document.getElementById('averagePerformance').textContent = averagePerformance.toFixed(2);
     } catch (error) {
         console.error("Error updating summary:", error);
+        showError("Failed to update summary. Please try again later.");
     }
 }
 
@@ -99,7 +112,7 @@ document.getElementById('addHoldingForm').addEventListener('submit', async (e) =
         refreshHoldings();
     } catch (error) {
         console.error("Error adding holding:", error);
-        alert("Failed to add holding. Please check the stock symbol and try again.");
+        showError(`Failed to add holding: ${error.message}`);
     } finally {
         showLoading(false);
     }
@@ -119,7 +132,7 @@ window.updateHolding = async (id) => {
             refreshHoldings();
         } catch (error) {
             console.error("Error updating holding:", error);
-            alert("Failed to update holding. Please try again.");
+            showError(`Failed to update holding: ${error.message}`);
         } finally {
             showLoading(false);
         }
@@ -134,7 +147,7 @@ window.deleteHolding = async (id) => {
             refreshHoldings();
         } catch (error) {
             console.error("Error deleting holding:", error);
-            alert("Failed to delete holding. Please try again.");
+            showError("Failed to delete holding. Please try again.");
         } finally {
             showLoading(false);
         }
@@ -144,6 +157,15 @@ window.deleteHolding = async (id) => {
 function showLoading(show) {
     const loadingIndicator = document.getElementById('loadingIndicator');
     loadingIndicator.style.display = show ? 'block' : 'none';
+}
+
+function showError(message) {
+    const errorElement = document.getElementById('addHoldingError');
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+    setTimeout(() => {
+        errorElement.style.display = 'none';
+    }, 5000);
 }
 
 // Initial load

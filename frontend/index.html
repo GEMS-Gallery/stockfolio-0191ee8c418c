@@ -82,6 +82,10 @@
             padding: 20px;
             font-weight: bold;
         }
+        .error {
+            color: #e53e3e;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -95,6 +99,7 @@
                 <input type="number" id="acquisitionPrice" placeholder="Acquisition Price" step="0.01" required>
                 <button type="submit">Add Holding</button>
             </form>
+            <div id="addHoldingError" class="error"></div>
         </div>
 
         <div class="loading" id="loadingIndicator">Loading...</div>
