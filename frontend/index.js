@@ -1,11 +1,15 @@
-import { backend } from 'declarations/backend';
+import { backend } from './declarations/backend';
 
 let holdings = [];
 
 async function refreshHoldings() {
-    holdings = await backend.getAllHoldings();
-    renderHoldings();
-    updateSummary();
+    try {
+        holdings = await backend.getAllHoldings();
+        renderHoldings();
+        updateSummary();
+    } catch (error) {
+        console.error("Error refreshing holdings:", error);
+    }
 }
 
 function renderHoldings() {
@@ -29,11 +33,15 @@ function renderHoldings() {
 }
 
 async function updateSummary() {
-    const totalValue = await backend.getTotalPortfolioValue();
-    const averagePerformance = await backend.getAveragePerformance();
-    
-    document.getElementById('totalValue').textContent = totalValue.toFixed(2);
-    document.getElementById('averagePerformance').textContent = averagePerformance.toFixed(2);
+    try {
+        const totalValue = await backend.getTotalPortfolioValue();
+        const averagePerformance = await backend.getAveragePerformance();
+        
+        document.getElementById('totalValue').textContent = totalValue.toFixed(2);
+        document.getElementById('averagePerformance').textContent = averagePerformance.toFixed(2);
+    } catch (error) {
+        console.error("Error updating summary:", error);
+    }
 }
 
 document.getElementById('addHoldingForm').addEventListener('submit', async (e) => {
@@ -43,9 +51,13 @@ document.getElementById('addHoldingForm').addEventListener('submit', async (e) =
     const marketValue = parseFloat(document.getElementById('marketValue').value);
     const performance = parseFloat(document.getElementById('performance').value);
 
-    await backend.addHolding(name, quantity, marketValue, performance);
-    e.target.reset();
-    refreshHoldings();
+    try {
+        await backend.addHolding(name, quantity, marketValue, performance);
+        e.target.reset();
+        refreshHoldings();
+    } catch (error) {
+        console.error("Error adding holding:", error);
+    }
 });
 
 window.editHolding = async (id) => {
@@ -58,15 +70,23 @@ window.editHolding = async (id) => {
     const performance = parseFloat(prompt('Enter new performance', holding.performance));
 
     if (name && !isNaN(quantity) && !isNaN(marketValue) && !isNaN(performance)) {
-        await backend.updateHolding(id, name, quantity, marketValue, performance);
-        refreshHoldings();
+        try {
+            await backend.updateHolding(id, name, quantity, marketValue, performance);
+            refreshHoldings();
+        } catch (error) {
+            console.error("Error updating holding:", error);
+        }
     }
 };
 
 window.deleteHolding = async (id) => {
     if (confirm('Are you sure you want to delete this holding?')) {
-        await backend.deleteHolding(id);
-        refreshHoldings();
+        try {
+            await backend.deleteHolding(id);
+            refreshHoldings();
+        } catch (error) {
+            console.error("Error deleting holding:", error);
+        }
     }
 };
 
