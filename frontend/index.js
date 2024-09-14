@@ -7,13 +7,27 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 const stockDataCache = new Map();
 
+const commonStockSymbols = {
+    'APPLE': 'AAPL',
+    'GOOGLE': 'GOOGL',
+    'AMAZON': 'AMZN',
+    'MICROSOFT': 'MSFT',
+    'FACEBOOK': 'FB',
+    // Add more common stock names and their symbols
+};
+
+function correctStockSymbol(symbol) {
+    return commonStockSymbols[symbol.toUpperCase()] || symbol.toUpperCase();
+}
+
 async function fetchStockData(symbol) {
-    const cachedData = stockDataCache.get(symbol);
+    const correctedSymbol = correctStockSymbol(symbol);
+    const cachedData = stockDataCache.get(correctedSymbol);
     if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
         return cachedData.data;
     }
 
-    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${API_KEY}`;
+    const url = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${correctedSymbol}&apikey=${API_KEY}`;
 
     try {
         const response = await fetch(url);
@@ -23,16 +37,19 @@ async function fetchStockData(symbol) {
             const stockData = {
                 symbol: data['Global Quote']['01. symbol'],
                 price: parseFloat(data['Global Quote']['05. price']),
-                name: symbol // Alpha Vantage doesn't provide company name in this API
+                name: correctedSymbol // Alpha Vantage doesn't provide company name in this API
             };
-            stockDataCache.set(symbol, { data: stockData, timestamp: Date.now() });
+            stockDataCache.set(correctedSymbol, { data: stockData, timestamp: Date.now() });
             return stockData;
+        } else if (data['Note']) {
+            throw new Error(`API limit reached: ${data['Note']}`);
         } else {
+            console.error('Unexpected API response:', data);
             throw new Error('Invalid API response');
         }
     } catch (error) {
         console.error('Error fetching stock data:', error);
-        throw new Error(`Failed to fetch data for ${symbol}: ${error.message}`);
+        throw new Error(`Failed to fetch data for ${correctedSymbol}: ${error.message}`);
     }
 }
 
@@ -107,7 +124,7 @@ document.getElementById('addHoldingForm').addEventListener('submit', async (e) =
     try {
         showLoading(true);
         const stockData = await fetchStockData(symbol);
-        await backend.addHolding(symbol, stockData.name, quantity, acquisitionPrice, stockData.price);
+        await backend.addHolding(stockData.symbol, stockData.name, quantity, acquisitionPrice, stockData.price);
         e.target.reset();
         refreshHoldings();
     } catch (error) {
