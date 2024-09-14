@@ -1,0 +1,16 @@
+type Holding = 
+ record {
+   id: nat;
+   marketValue: float64;
+   name: text;
+   performance: float64;
+   quantity: nat;
+ };
+service : {
+  addHolding: (text, nat, float64, float64) -> (nat);
+  deleteHolding: (nat) -> (bool);
+  getAllHoldings: () -> (vec Holding) query;
+  getAveragePerformance: () -> (float64) query;
+  getTotalPortfolioValue: () -> (float64) query;
+  updateHolding: (nat, text, nat, float64, float64) -> (bool);
+}

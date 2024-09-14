@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Holdings App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, button {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Stock Holdings App</h1>
+    
+    <form id="addHoldingForm">
+        <input type="text" id="name" placeholder="Stock Name" required>
+        <input type="number" id="quantity" placeholder="Quantity" required>
+        <input type="number" id="marketValue" placeholder="Market Value" step="0.01" required>
+        <input type="number" id="performance" placeholder="Performance (%)" step="0.01" required>
+        <button type="submit">Add Holding</button>
+    </form>
+
+    <table id="holdingsTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Quantity</th>
+                <th>Market Value</th>
+                <th>Performance</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <div id="summary">
+        <p>Total Portfolio Value: $<span id="totalValue">0.00</span></p>
+        <p>Average Performance: <span id="averagePerformance">0.00</span>%</p>
+    </div>
+
+    <script src="index.js"></script>
+</body>
+</html>
